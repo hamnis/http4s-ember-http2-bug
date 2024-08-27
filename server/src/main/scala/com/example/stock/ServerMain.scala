@@ -8,6 +8,7 @@ import com.example.stock.stockquote.{Stock, StockQuote, StockQuoteProviderGrpc}
 import io.grpc.ServerBuilder
 import io.grpc.stub.StreamObserver
 
+import java.io.File
 import scala.concurrent.duration.*
 
 object ServerMain extends IOApp {
@@ -17,11 +18,19 @@ object ServerMain extends IOApp {
       ec <- Resource.eval(IO.executionContext)
     } yield disp -> ec
 
+    lazy val root = {
+      var file = new File(getClass.getProtectionDomain.getCodeSource.getLocation.getFile)
+      while (!new File(file.getParentFile, "build.sbt").exists())
+        file = file.getParentFile
+      file.getParentFile
+    }
+
     resources.flatMap { (disp, ec) =>
       Resource(
         IO.blocking(
           ServerBuilder
             .forPort(9999)
+            .useTransportSecurity(new File(root, "cert.pem"), new File(root, "key.pem"))
             .addService(
               StockQuoteProviderGrpc.bindService(StockServiceRpc(InfiniteStockServiceStream, disp), ec)
             )
