@@ -9,7 +9,9 @@ val client = project
       scalapb.gen(grpc = false) -> (Compile / sourceManaged).value / "scalapb"
     ),
     libraryDependencies ++= Seq(
-      "org.http4s" %% "http4s-ember-client" % "0.23.27"
+      "org.http4s" %% "http4s-ember-client" % "0.23.29",
+      "org.typelevel" %% "log4cats-slf4j" % "2.7.0",
+      "ch.qos.logback" % "logback-classic" % "1.2.13"
     )
   )
 

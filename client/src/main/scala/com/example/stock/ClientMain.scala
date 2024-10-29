@@ -10,6 +10,7 @@ import org.http4s.implicits.uri
 import java.io.{File, FileInputStream}
 import java.security.KeyStore
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
+import org.typelevel.log4cats.slf4j.Slf4jFactory
 
 object ClientMain extends IOApp {
   lazy val root = {
@@ -31,11 +32,13 @@ object ClientMain extends IOApp {
     ctx
   }
 
-  override def run(args: List[String]): IO[ExitCode] =
+  override def run(args: List[String]): IO[ExitCode] = {
+    val loggerFactory = Slf4jFactory.create[IO]
     EmberClientBuilder
       .default[IO]
       .withHttp2
       .withTLSContext(TLSContext.Builder.forAsync[IO].fromSSLContext(sslContextForClient))
+      .withLogger(loggerFactory.getLoggerFromClass(getClass))
       .build
       .map(c => StockQuoteProvider.fromClient(c, uri"https://localhost:9999"))
       .use { svc =>
@@ -46,4 +49,5 @@ object ClientMain extends IOApp {
           .drain
       }
       .as(ExitCode.Success)
+    }
 }

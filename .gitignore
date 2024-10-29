@@ -7,3 +7,4 @@ release.sbt
 out
 metals.sbt
 .bsp/
+.vscode/
